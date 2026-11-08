@@ -1,14 +1,22 @@
+using RetroGames.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddSingleton(new RepositoryConfig
+{
+    ConnectionString = builder.Configuration
+        .GetConnectionString("Default")
+        ?? throw new InvalidOperationException(
+            "A connection string 'Default' não foi configurada.")
+});
 
+// Adiciona os serviços ao contêiner.
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configura o pipeline de requisições HTTP.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
