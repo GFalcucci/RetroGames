@@ -1,8 +1,7 @@
-
 using Microsoft.AspNetCore.Mvc;
-using RetroGames.Model.Model;
 using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
 
@@ -18,14 +17,18 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ResponseApiModel<List<Plataforma>>>> Listar()
+    public async Task<ActionResult<ResponseApiModel<List<ListarPlataformaResponseApiModel>>>> Listar()
     {
         var plataformas = await _plataformaService.ListarAsync();
 
-        var resposta = new ResponseApiModel<List<Plataforma>>
+        var plataformasResponse = plataformas
+            .Select(PlataformaMapper.ParaResponse)
+            .ToList();
+
+        var resposta = new ResponseApiModel<List<ListarPlataformaResponseApiModel>>
         {
             ResponseCode = ResponseCodes.SUCESSO,
-            Data = plataformas,
+            Data = plataformasResponse,
             ErrorMessage = null
         };
 
@@ -33,14 +36,16 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ResponseApiModel<Plataforma>>> BuscarPorId(int id)
+    public async Task<ActionResult<ResponseApiModel<ListarPlataformaResponseApiModel>>> BuscarPorId(int id)
     {
         var plataforma = await _plataformaService.BuscarPorIdAsync(id);
 
-        var resposta = new ResponseApiModel<Plataforma>
+        var plataformaResponse = PlataformaMapper.ParaResponse(plataforma);
+
+        var resposta = new ResponseApiModel<ListarPlataformaResponseApiModel>
         {
             ResponseCode = ResponseCodes.SUCESSO,
-            Data = plataforma,
+            Data = plataformaResponse,
             ErrorMessage = null
         };
 

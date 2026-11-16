@@ -1,5 +1,6 @@
 
 using RetroGames.WebApi.Configuration;
+using RetroGames.WebApi.Exceptions;
 
 // Carrega as variáveis do arquivo .env.
 DotNetEnv.Env.TraversePath().Load();
@@ -25,9 +26,15 @@ builder.Services.AddServicosDeNegocio();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Registra o tratamento global de exceções.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
-// Configura a documentação da API somente em desenvolvimento.
+// Ativa o tratamento global de exceções.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
