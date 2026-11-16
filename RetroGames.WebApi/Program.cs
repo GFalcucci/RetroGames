@@ -1,6 +1,6 @@
 
 using RetroGames.WebApi.Configuration;
-using RetroGames.WebApi.Exceptions;
+using RetroGames.WebApi.Middlewares;
 
 // Carrega as variáveis do arquivo .env.
 DotNetEnv.Env.TraversePath().Load();
@@ -32,7 +32,7 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
-// Ativa o tratamento global de exceções.
+// O tratamento de exceções deve ser a primeira etapa do pipeline.
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
