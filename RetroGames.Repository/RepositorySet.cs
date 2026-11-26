@@ -1,3 +1,4 @@
+
 using RetroGames.Repository.Interfaces;
 using RetroGames.Repository.Repositories;
 
@@ -10,6 +11,7 @@ public class RepositorySet : IRepositorySet
     public IJogoGeneroRepository JogoGenero { get; }
     public IGeneroRepository Genero { get; }
     public ICondicaoJogoRepository CondicaoJogo { get; }
+    public IUsuarioRepository Usuario { get; }
 
     public RepositorySet(RepositoryConfig config)
     {
@@ -18,5 +20,6 @@ public class RepositorySet : IRepositorySet
         JogoGenero = new JogoGeneroRepository(config);
         Genero = new GeneroRepository(config);
         CondicaoJogo = new CondicaoJogoRepository(config);
+        Usuario = new UsuarioRepository(config);
     }
 }

@@ -1,3 +1,4 @@
+
 using RetroGames.Repository.Interfaces;
 
 namespace RetroGames.Repository;
@@ -9,4 +10,5 @@ public interface IRepositorySet
     IJogoGeneroRepository JogoGenero { get; }
     IGeneroRepository Genero { get; }
     ICondicaoJogoRepository CondicaoJogo { get; }
+    IUsuarioRepository Usuario { get; }
 }
