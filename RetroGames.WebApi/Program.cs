@@ -1,7 +1,6 @@
 
 using System.Text.Json;
 using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using RetroGames.Services.Interfaces;
@@ -9,6 +8,7 @@ using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Filters;
 using RetroGames.WebApi.Middlewares;
+using RetroGames.WebApi.Services;
 
 // Carrega as variáveis do arquivo .env.
 DotNetEnv.Env.TraversePath().Load();
@@ -30,17 +30,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddRepositorios(connectionString);
 builder.Services.AddServicosDeNegocio();
 
+// Registra o acesso ao usuário da requisição atual.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUsuarioAtual, UsuarioAtual>();
+
 // Registra a autenticação por cookie.
 builder.Services.AdicionarAutenticacao();
 
-// Exige autenticação por padrão em todas as rotas.
-// Rotas públicas deverão utilizar [AllowAnonymous].
-builder.Services.AddAuthorization(opcoes =>
-{
-    opcoes.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+// Registra as políticas de autorização.
+builder.Services.AdicionarAutorizacao();
 
 // Registra os validators do projeto.
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

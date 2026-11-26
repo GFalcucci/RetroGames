@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
@@ -18,6 +19,7 @@ public class TabelaTipoController : ControllerBase
         _condicaoJogoService = condicaoJogoService;
     }
 
+    [AllowAnonymous]
     [HttpGet("condicoes-jogo")]
     public async Task<ActionResult<ResponseApiModel<List<ListarCondicaoJogoResponseApiModel>>>> Listar()
     {

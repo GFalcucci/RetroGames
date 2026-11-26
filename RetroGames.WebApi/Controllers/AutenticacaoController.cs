@@ -73,7 +73,6 @@ public class AutenticacaoController : ControllerBase
         return Ok(resposta);
     }
 
-    [Authorize]
     [HttpPost("logout")]
     public async Task<ActionResult<ResponseApiModel<object?>>> Logout()
     {
@@ -89,7 +88,6 @@ public class AutenticacaoController : ControllerBase
         return Ok(resposta);
     }
 
-    [Authorize]
     [HttpGet("eu")]
     public ActionResult<ResponseApiModel<UsuarioAutenticadoResponseApiModel>> Eu()
     {

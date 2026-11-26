@@ -10,6 +10,7 @@ public interface IJogoService
         string? nome,
         int? idPlataforma,
         int? idGenero,
+        bool incluirInativos,
         int pagina,
         int tamanhoPagina);
 

@@ -1,7 +1,9 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
@@ -17,6 +19,7 @@ public class JogoController : ControllerBase
         _jogoService = jogoService;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<ResponseApiModel<PaginacaoResponseApiModel<ListarJogoResponseApiModel>>>> Listar(
         [FromQuery] ListarJogoRequestApiModel request)
@@ -25,6 +28,7 @@ public class JogoController : ControllerBase
             request.Busca,
             request.IdPlataforma,
             request.IdGenero,
+            request.IncluirInativos,
             request.Pagina,
             request.TamanhoPagina);
 
@@ -53,6 +57,7 @@ public class JogoController : ControllerBase
         return Ok(resposta);
     }
 
+    [AllowAnonymous]
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ResponseApiModel<BuscarJogoPorIdResponseApiModel>>> BuscarPorId(
         int id)
@@ -71,6 +76,7 @@ public class JogoController : ControllerBase
         return Ok(resposta);
     }
 
+    [Authorize(Policy = Politicas.Administrador)]
     [HttpPost]
     public async Task<ActionResult<ResponseApiModel<BuscarJogoPorIdResponseApiModel>>> Inserir(
         [FromBody] InserirJogoRequestApiModel request)
@@ -94,6 +100,7 @@ public class JogoController : ControllerBase
             resposta);
     }
 
+    [Authorize(Policy = Politicas.Administrador)]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ResponseApiModel<BuscarJogoPorIdResponseApiModel>>> Alterar(
         int id,
@@ -118,6 +125,7 @@ public class JogoController : ControllerBase
         return Ok(resposta);
     }
 
+    [Authorize(Policy = Politicas.Administrador)]
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<ResponseApiModel<object?>>> Desativar(int id)
     {

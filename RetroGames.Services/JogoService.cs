@@ -10,16 +10,21 @@ namespace RetroGames.Services;
 public class JogoService : IJogoService
 {
     private readonly IRepositorySet _repositorio;
+    private readonly IUsuarioAtual _usuarioAtual;
 
-    public JogoService(IRepositorySet repositorio)
+    public JogoService(
+        IRepositorySet repositorio,
+        IUsuarioAtual usuarioAtual)
     {
         _repositorio = repositorio;
+        _usuarioAtual = usuarioAtual;
     }
 
     public async Task<(List<JogoDetalheServiceModel> Jogos, int Total)> ListarAsync(
         string? nome,
         int? idPlataforma,
         int? idGenero,
+        bool incluirInativos,
         int pagina,
         int tamanhoPagina)
     {
@@ -41,11 +46,15 @@ public class JogoService : IJogoService
             }
         }
 
+        // Somente administradores podem solicitar jogos inativos.
+        var podeIncluirInativos =
+            incluirInativos && _usuarioAtual.EhAdministrador;
+
         var resultado = await _repositorio.Jogo.ListarAsync(
             nome,
             idPlataforma,
             idsJogos,
-            false,
+            podeIncluirInativos,
             pagina,
             tamanhoPagina);
 
@@ -58,7 +67,9 @@ public class JogoService : IJogoService
     {
         var jogo = await _repositorio.Jogo.BuscarPorIdAsync(id);
 
-        if (jogo == null)
+        // Jogos inativos não são visíveis para usuários comuns.
+        if (jogo == null ||
+            (!jogo.Ativo && !_usuarioAtual.EhAdministrador))
         {
             throw new BusinessRuleException(BusinessErrors.JogoNaoEncontrado);
         }
