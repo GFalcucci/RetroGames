@@ -9,7 +9,13 @@ const api = axios.create({
 api.interceptors.response.use(
   resposta => resposta,
   erro => {
-    if (erro.response?.status === 401) {
+    const url = erro.config?.url ?? ''
+
+    const erroEsperado =
+      url.includes('/Autenticacao/eu') ||
+      url.includes('/Autenticacao/login')
+
+    if (erro.response?.status === 401 && !erroEsperado) {
       window.dispatchEvent(new Event('sessao:expirada'))
     }
 

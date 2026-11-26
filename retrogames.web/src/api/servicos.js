@@ -1,6 +1,23 @@
 
 import api from './api'
 
+export const autenticacaoApi = {
+  async entrar(dados) {
+    const resposta = await api.post('/Autenticacao/login', dados)
+    return resposta.data.data
+  },
+
+  async sair() {
+    const resposta = await api.post('/Autenticacao/logout')
+    return resposta.data.data
+  },
+
+  async usuarioAtual() {
+    const resposta = await api.get('/Autenticacao/eu')
+    return resposta.data.data
+  }
+}
+
 export const plataformaApi = {
   async listar() {
     const resposta = await api.get('/Plataforma')
@@ -41,7 +58,7 @@ export const jogoApi = {
   },
 
   async buscarPorId(id) {
-  const resposta = await api.get(`/Jogo/${id}`)
-  return resposta.data.data
-}
+    const resposta = await api.get(`/Jogo/${id}`)
+    return resposta.data.data
+  }
 }
