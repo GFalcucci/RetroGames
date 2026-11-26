@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
 
+import { useCallback, useEffect, useState } from 'react'
 import autenticacaoContext from './autenticacaoContext'
 import { autenticacaoApi } from '../api/servicos'
 
@@ -9,9 +9,7 @@ function AutenticacaoProvider({ children }) {
 
   const entrar = useCallback(async (dados) => {
     const usuarioAutenticado = await autenticacaoApi.entrar(dados)
-
     setUsuario(usuarioAutenticado)
-
     return usuarioAutenticado
   }, [])
 
@@ -63,7 +61,7 @@ function AutenticacaoProvider({ children }) {
     usuario,
     carregando,
     estaAutenticado: Boolean(usuario),
-    ehAdministrador: usuario?.perfil === 'Administrador',
+    ehAdministrador: usuario?.idPerfil === 1,
     entrar,
     sair
   }

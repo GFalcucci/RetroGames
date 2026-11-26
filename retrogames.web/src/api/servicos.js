@@ -27,6 +27,21 @@ export const plataformaApi = {
   async obterPorId(id) {
     const resposta = await api.get(`/Plataforma/${id}`)
     return resposta.data.data
+  },
+
+  async inserir(dados) {
+    const resposta = await api.post('/Plataforma', dados)
+    return resposta.data.data
+  },
+
+  async alterar(id, dados) {
+    const resposta = await api.put(`/Plataforma/${id}`, dados)
+    return resposta.data.data
+  },
+
+  async excluir(id) {
+    const resposta = await api.delete(`/Plataforma/${id}`)
+    return resposta.data.data
   }
 }
 
@@ -59,6 +74,21 @@ export const jogoApi = {
 
   async buscarPorId(id) {
     const resposta = await api.get(`/Jogo/${id}`)
+    return resposta.data.data
+  },
+
+  async inserir(dados) {
+    const resposta = await api.post('/Jogo', dados)
+    return resposta.data.data
+  },
+
+  async alterar(id, dados) {
+    const resposta = await api.put(`/Jogo/${id}`, dados)
+    return resposta.data.data
+  },
+
+  async excluir(id) {
+    const resposta = await api.delete(`/Jogo/${id}`)
     return resposta.data.data
   }
 }

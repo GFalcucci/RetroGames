@@ -1,3 +1,4 @@
+
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import useAutenticacao from '../hooks/useAutenticacao'
@@ -7,6 +8,7 @@ function Layout() {
     usuario,
     carregando,
     estaAutenticado,
+    ehAdministrador,
     sair
   } = useAutenticacao()
 
@@ -39,30 +41,65 @@ function Layout() {
             </NavLink>
 
             {!carregando && (
-              estaAutenticado ? (
-                <>
-                  <span className="navbar-text text-light mx-lg-3">
-                    Olá, {usuario.nome}
-                  </span>
+              <>
+                {estaAutenticado && ehAdministrador && (
+                  <div className="nav-item dropdown">
+                    <button
+                      className="nav-link dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      Administração
+                    </button>
 
-                  <button
-                    type="button"
-                    className="btn btn-outline-light btn-sm ms-lg-2"
-                    onClick={tratarSaida}
+                    <ul className="dropdown-menu">
+                      <li>
+                        <NavLink
+                          className="dropdown-item"
+                          to="/admin/jogos"
+                        >
+                          Jogos
+                        </NavLink>
+                      </li>
+
+                      <li>
+                        <NavLink
+                          className="dropdown-item"
+                          to="/admin/plataformas"
+                        >
+                          Plataformas
+                        </NavLink>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {estaAutenticado ? (
+                  <>
+                    <span className="navbar-text text-light mx-lg-3">
+                      Olá, {usuario.nome}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline-light btn-sm ms-lg-2"
+                      onClick={tratarSaida}
+                    >
+                      Sair
+                    </button>
+                  </>
+                ) : (
+                  <NavLink
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? 'active' : ''}`
+                    }
+                    to="/login"
                   >
-                    Sair
-                  </button>
-                </>
-              ) : (
-                <NavLink
-                  className={({ isActive }) =>
-                    `nav-link ${isActive ? 'active' : ''}`
-                  }
-                  to="/login"
-                >
-                  Entrar
-                </NavLink>
-              )
+                    Entrar
+                  </NavLink>
+                )}
+              </>
             )}
           </div>
         </div>
