@@ -1,4 +1,4 @@
-USE db2025108027;
+USE retrogames;
 
 -- =========================================
 -- 1. Tabela de condições dos jogos
