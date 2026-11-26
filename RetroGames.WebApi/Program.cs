@@ -1,6 +1,10 @@
+
 using System.Text.Json;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Configuration;
 using RetroGames.WebApi.Filters;
@@ -25,6 +29,18 @@ if (string.IsNullOrWhiteSpace(connectionString))
 // Registra repositórios e serviços de negócio.
 builder.Services.AddRepositorios(connectionString);
 builder.Services.AddServicosDeNegocio();
+
+// Registra a autenticação por cookie.
+builder.Services.AdicionarAutenticacao();
+
+// Exige autenticação por padrão em todas as rotas.
+// Rotas públicas deverão utilizar [AllowAnonymous].
+builder.Services.AddAuthorization(opcoes =>
+{
+    opcoes.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 // Registra os validators do projeto.
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -68,12 +84,26 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
+// Garante a existência do administrador inicial.
+using (var escopo = app.Services.CreateScope())
+{
+    var usuarioService = escopo.ServiceProvider
+        .GetRequiredService<IUsuarioService>();
+
+    var emailAdmin = builder.Configuration["AdminInicial:Email"];
+    var senhaAdmin = builder.Configuration["AdminInicial:Senha"];
+
+    await usuarioService.GarantirAdministradorInicialAsync(
+        emailAdmin ?? string.Empty,
+        senhaAdmin ?? string.Empty);
+}
+
 // O tratamento de exceções deve ser a primeira etapa do pipeline.
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
 
     app.UseSwaggerUI(options =>
     {
@@ -85,6 +115,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Primeiro identifica o usuário; depois verifica suas permissões.
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
