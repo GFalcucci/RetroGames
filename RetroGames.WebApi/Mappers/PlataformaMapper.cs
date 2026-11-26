@@ -16,4 +16,26 @@ public static class PlataformaMapper
             AnoLancamento = plataforma.AnoLancamento
         };
     }
+
+    public static Plataforma ParaModel(
+        InserirPlataformaRequestApiModel modelo)
+    {
+        return new Plataforma
+        {
+            Nome = modelo.Nome,
+            Fabricante = modelo.Fabricante,
+            AnoLancamento = modelo.AnoLancamento
+        };
+    }
+
+    public static Plataforma ParaModel(
+        AlterarPlataformaRequestApiModel modelo)
+    {
+        return new Plataforma
+        {
+            Nome = modelo.Nome,
+            Fabricante = modelo.Fabricante,
+            AnoLancamento = modelo.AnoLancamento
+        };
+    }
 }

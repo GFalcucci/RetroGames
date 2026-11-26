@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
@@ -36,7 +37,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ResponseApiModel<ListarPlataformaResponseApiModel>>> BuscarPorId(int id)
+    public async Task<ActionResult<ResponseApiModel<ListarPlataformaResponseApiModel>>> ListarPorId(int id)
     {
         var plataforma = await _plataformaService.BuscarPorIdAsync(id);
 
@@ -46,6 +47,63 @@ public class PlataformaController : ControllerBase
         {
             ResponseCode = ResponseCodes.SUCESSO,
             Data = plataformaResponse,
+            ErrorMessage = null
+        };
+
+        return Ok(resposta);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ResponseApiModel<ListarPlataformaResponseApiModel>>> Inserir(
+        InserirPlataformaRequestApiModel modelo)
+    {
+        var plataforma = PlataformaMapper.ParaModel(modelo);
+
+        var id = await _plataformaService.InserirAsync(plataforma);
+
+        var criada = await _plataformaService.BuscarPorIdAsync(id);
+
+        var resposta = new ResponseApiModel<ListarPlataformaResponseApiModel>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = PlataformaMapper.ParaResponse(criada),
+            ErrorMessage = null
+        };
+
+        return CreatedAtAction(nameof(ListarPorId), new { id = criada.Id }, resposta);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ResponseApiModel<ListarPlataformaResponseApiModel>>> Alterar(
+        int id,
+        AlterarPlataformaRequestApiModel modelo)
+    {
+        var plataforma = PlataformaMapper.ParaModel(modelo);
+        plataforma.Id = id;
+
+        await _plataformaService.AlterarAsync(plataforma);
+
+        var alterada = await _plataformaService.BuscarPorIdAsync(id);
+
+        var resposta = new ResponseApiModel<ListarPlataformaResponseApiModel>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = PlataformaMapper.ParaResponse(alterada),
+            ErrorMessage = null
+        };
+
+        return Ok(resposta);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<ResponseApiModel<object?>>> Excluir(int id)
+    {
+        await _plataformaService.ExcluirAsync(id);
+
+        var resposta = new ResponseApiModel<object?>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = null,
             ErrorMessage = null
         };
 
