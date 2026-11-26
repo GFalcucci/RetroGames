@@ -68,12 +68,14 @@ public class JogoService : IJogoService
         return detalhes[0];
     }
 
-    public async Task<int> InserirAsync(JogoDetalheServiceModel detalhe)
+    public async Task<int> InserirAsync(
+        Jogo jogo,
+        List<int> idsGeneros)
     {
-        detalhe.Jogo.Nome = detalhe.Jogo.Nome.Trim();
-        detalhe.Jogo.Ativo = true;
+        jogo.Nome = jogo.Nome.Trim();
+        jogo.Ativo = true;
 
-        await ValidarReferenciasAsync(detalhe);
+        await ValidarReferenciasAsync(jogo, idsGeneros);
 
         var opcoesTransacao = new TransactionOptions
         {
@@ -86,13 +88,14 @@ public class JogoService : IJogoService
             opcoesTransacao,
             TransactionScopeAsyncFlowOption.Enabled);
 
-        var idJogo = await _repositorio.Jogo.InserirAsync(detalhe.Jogo);
+        var idJogo = await _repositorio.Jogo.InserirAsync(jogo);
 
-        var vinculos = detalhe.Generos
-            .Select(genero => new JogoGenero
+        var vinculos = idsGeneros
+            .Distinct()
+            .Select(idGenero => new JogoGenero
             {
                 IdJogo = idJogo,
-                IdGenero = genero.Id
+                IdGenero = idGenero
             })
             .ToList();
 
@@ -103,19 +106,25 @@ public class JogoService : IJogoService
         return idJogo;
     }
 
-    public async Task AlterarAsync(JogoDetalheServiceModel detalhe)
+    public async Task AlterarAsync(
+        Jogo jogo,
+        List<int> idsGeneros)
     {
         var jogoExistente = await _repositorio.Jogo.BuscarPorIdAsync(
-            detalhe.Jogo.Id);
+            jogo.Id);
 
         if (jogoExistente == null)
         {
             throw new BusinessRuleException(BusinessErrors.JogoNaoEncontrado);
         }
 
-        detalhe.Jogo.Nome = detalhe.Jogo.Nome.Trim();
+        jogo.Nome = jogo.Nome.Trim();
 
-        await ValidarReferenciasAsync(detalhe);
+        // Preserva os dados controlados pelo sistema.
+        jogo.Ativo = jogoExistente.Ativo;
+        jogo.DataCadastro = jogoExistente.DataCadastro;
+
+        await ValidarReferenciasAsync(jogo, idsGeneros);
 
         var opcoesTransacao = new TransactionOptions
         {
@@ -128,15 +137,16 @@ public class JogoService : IJogoService
             opcoesTransacao,
             TransactionScopeAsyncFlowOption.Enabled);
 
-        await _repositorio.Jogo.AlterarAsync(detalhe.Jogo);
+        await _repositorio.Jogo.AlterarAsync(jogo);
 
-        await _repositorio.JogoGenero.RemoverPorJogoAsync(detalhe.Jogo.Id);
+        await _repositorio.JogoGenero.RemoverPorJogoAsync(jogo.Id);
 
-        var vinculos = detalhe.Generos
-            .Select(genero => new JogoGenero
+        var vinculos = idsGeneros
+            .Distinct()
+            .Select(idGenero => new JogoGenero
             {
-                IdJogo = detalhe.Jogo.Id,
-                IdGenero = genero.Id
+                IdJogo = jogo.Id,
+                IdGenero = idGenero
             })
             .ToList();
 
@@ -158,10 +168,11 @@ public class JogoService : IJogoService
     }
 
     private async Task ValidarReferenciasAsync(
-        JogoDetalheServiceModel detalhe)
+        Jogo jogo,
+        List<int> idsGeneros)
     {
         var plataforma = await _repositorio.Plataforma.BuscarPorIdAsync(
-            detalhe.Jogo.IdPlataforma);
+            jogo.IdPlataforma);
 
         if (plataforma == null)
         {
@@ -172,7 +183,7 @@ public class JogoService : IJogoService
         var condicoes = await _repositorio.CondicaoJogo.ListarAsync();
 
         if (!condicoes.Any(condicao =>
-            condicao.Id == detalhe.Jogo.IdCondicaoJogo))
+            condicao.Id == jogo.IdCondicaoJogo))
         {
             throw new BusinessRuleException(
                 BusinessErrors.CondicaoNaoEncontrada);
@@ -180,13 +191,12 @@ public class JogoService : IJogoService
 
         var generos = await _repositorio.Genero.ListarAsync();
 
-        var idsGeneros = detalhe.Generos
-            .Select(genero => genero.Id)
+        var idsUnicos = idsGeneros
             .Distinct()
             .ToList();
 
-        if (idsGeneros.Count == 0 ||
-            idsGeneros.Any(idGenero =>
+        if (idsUnicos.Count == 0 ||
+            idsUnicos.Any(idGenero =>
                 !generos.Any(genero => genero.Id == idGenero)))
         {
             throw new BusinessRuleException(
@@ -207,6 +217,7 @@ public class JogoService : IJogoService
         var plataformas = await _repositorio.Plataforma.ListarAsync();
         var condicoes = await _repositorio.CondicaoJogo.ListarAsync();
         var generos = await _repositorio.Genero.ListarAsync();
+
         var vinculos = await _repositorio.JogoGenero.ListarPorJogosAsync(
             idsJogos);
 

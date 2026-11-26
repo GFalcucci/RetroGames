@@ -1,4 +1,5 @@
 
+using RetroGames.Model.Model;
 using RetroGames.Services.ServiceModels;
 
 namespace RetroGames.Services.Interfaces;
@@ -14,9 +15,9 @@ public interface IJogoService
 
     Task<JogoDetalheServiceModel> BuscarPorIdAsync(int id);
 
-    Task<int> InserirAsync(JogoDetalheServiceModel jogo);
+    Task<int> InserirAsync(Jogo jogo, List<int> idsGeneros);
 
-    Task AlterarAsync(JogoDetalheServiceModel jogo);
+    Task AlterarAsync(Jogo jogo, List<int> idsGeneros);
 
     Task DesativarAsync(int id);
 }

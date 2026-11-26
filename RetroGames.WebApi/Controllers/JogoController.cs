@@ -70,4 +70,66 @@ public class JogoController : ControllerBase
 
         return Ok(resposta);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<ResponseApiModel<BuscarJogoPorIdResponseApiModel>>> Inserir(
+        [FromBody] InserirJogoRequestApiModel request)
+    {
+        var id = await _jogoService.InserirAsync(
+            JogoMapper.ParaModel(request),
+            request.IdsGeneros);
+
+        var criado = await _jogoService.BuscarPorIdAsync(id);
+
+        var resposta = new ResponseApiModel<BuscarJogoPorIdResponseApiModel>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = JogoMapper.ParaBuscarPorId(criado),
+            ErrorMessage = null
+        };
+
+        return CreatedAtAction(
+            nameof(BuscarPorId),
+            new { id },
+            resposta);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ResponseApiModel<BuscarJogoPorIdResponseApiModel>>> Alterar(
+        int id,
+        [FromBody] AlterarJogoRequestApiModel request)
+    {
+        var jogo = JogoMapper.ParaModel(request);
+        jogo.Id = id;
+
+        await _jogoService.AlterarAsync(
+            jogo,
+            request.IdsGeneros);
+
+        var alterado = await _jogoService.BuscarPorIdAsync(id);
+
+        var resposta = new ResponseApiModel<BuscarJogoPorIdResponseApiModel>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = JogoMapper.ParaBuscarPorId(alterado),
+            ErrorMessage = null
+        };
+
+        return Ok(resposta);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<ResponseApiModel<object?>>> Desativar(int id)
+    {
+        await _jogoService.DesativarAsync(id);
+
+        var resposta = new ResponseApiModel<object?>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = null,
+            ErrorMessage = null
+        };
+
+        return Ok(resposta);
+    }
 }
