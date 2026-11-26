@@ -1,6 +1,7 @@
 using RetroGames.Services.ServiceModels;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.Model.Model;
+
 namespace RetroGames.WebApi.Mappers;
 
 public static class JogoMapper
@@ -15,6 +16,7 @@ public static class JogoMapper
             AnoLancamento = jogo.Jogo.AnoLancamento,
             Preco = jogo.Jogo.Preco,
             Estoque = jogo.Jogo.Estoque,
+            Ativo = jogo.Jogo.Ativo,
             NomePlataforma = jogo.NomePlataforma,
             DescricaoCondicao = jogo.DescricaoCondicao,
             Generos = jogo.Generos
@@ -34,6 +36,11 @@ public static class JogoMapper
             AnoLancamento = jogo.Jogo.AnoLancamento,
             Preco = jogo.Jogo.Preco,
             Estoque = jogo.Jogo.Estoque,
+            IdPlataforma = jogo.Jogo.IdPlataforma,
+            IdCondicaoJogo = jogo.Jogo.IdCondicaoJogo,
+            IdsGeneros = jogo.Generos
+                .Select(genero => genero.Id)
+                .ToList(),
             NomePlataforma = jogo.NomePlataforma,
             DescricaoCondicao = jogo.DescricaoCondicao,
             Generos = jogo.Generos

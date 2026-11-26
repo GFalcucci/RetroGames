@@ -12,6 +12,8 @@ public class ListarJogoResponseApiModel
 
     public int Estoque { get; set; }
 
+    public bool Ativo { get; set; }
+
     public string NomePlataforma { get; set; } = string.Empty;
 
     public string DescricaoCondicao { get; set; } = string.Empty;

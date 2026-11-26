@@ -11,6 +11,7 @@ import NaoEncontrada from './pages/NaoEncontrada'
 
 import Jogos from './pages/admin/Jogos'
 import Plataformas from './pages/admin/Plataformas'
+import FormularioJogo from './pages/admin/FormularioJogo'
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
         <Route element={<RotaProtegida somenteAdministrador />}>
           <Route path="admin">
             <Route path="jogos" element={<Jogos />} />
+            <Route path="jogos/novo" element={<FormularioJogo />} />
+            <Route path="jogos/:id/editar" element={<FormularioJogo />} />
             <Route path="plataformas" element={<Plataformas />} />
           </Route>
         </Route>

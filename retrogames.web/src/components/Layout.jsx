@@ -1,5 +1,10 @@
 
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+  useLocation
+} from 'react-router-dom'
 
 import useAutenticacao from '../hooks/useAutenticacao'
 
@@ -13,6 +18,9 @@ function Layout() {
   } = useAutenticacao()
 
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const estaNaAdministracao = location.pathname.startsWith('/admin')
 
   async function tratarSaida() {
     try {
@@ -22,20 +30,43 @@ function Layout() {
     }
   }
 
+  const estiloLink = ({ isActive }) => ({
+    color: isActive ? '#F28C28' : '#FFFFFF',
+    fontWeight: isActive ? 'bold' : 'normal',
+    textDecoration: 'none'
+  })
+
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <nav
+        className="navbar navbar-expand-lg navbar-dark"
+        style={{ backgroundColor: '#701F36' }}
+      >
         <div className="container">
-          <NavLink className="navbar-brand" to="/">
-            RetroGames
+          <NavLink
+            className="navbar-brand fw-bold d-flex align-items-center gap-2"
+            style={{ color: '#FFFFFF' }}
+            to="/"
+          >
+            <img
+              src="/simbolo.png"
+              alt="Símbolo RetroGames"
+              style={{
+                width: '50px',
+                height: '50px',
+                objectFit: 'contain'
+              }}
+            />
+
+            <span>RetroGames</span>
           </NavLink>
 
           <div className="navbar-nav ms-auto align-items-lg-center">
             <NavLink
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'active' : ''}`
-              }
+              className="nav-link"
+              style={estiloLink}
               to="/"
+              end
             >
               Catálogo
             </NavLink>
@@ -45,7 +76,9 @@ function Layout() {
                 {estaAutenticado && ehAdministrador && (
                   <div className="nav-item dropdown">
                     <button
-                      className="nav-link dropdown-toggle"
+                      className={`nav-link dropdown-toggle border-0 menu-administracao ${
+                        estaNaAdministracao ? 'administracao-ativa' : ''
+                      }`}
                       type="button"
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
@@ -83,7 +116,12 @@ function Layout() {
 
                     <button
                       type="button"
-                      className="btn btn-outline-light btn-sm ms-lg-2"
+                      className="btn btn-sm ms-lg-2"
+                      style={{
+                        backgroundColor: '#F28C28',
+                        color: '#FFFFFF',
+                        borderColor: '#F28C28'
+                      }}
                       onClick={tratarSaida}
                     >
                       Sair
@@ -91,9 +129,8 @@ function Layout() {
                   </>
                 ) : (
                   <NavLink
-                    className={({ isActive }) =>
-                      `nav-link ${isActive ? 'active' : ''}`
-                    }
+                    className="nav-link"
+                    style={estiloLink}
                     to="/login"
                   >
                     Entrar

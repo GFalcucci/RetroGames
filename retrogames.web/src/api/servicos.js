@@ -59,7 +59,7 @@ export const generoApi = {
 
 export const condicaoJogoApi = {
   async listar() {
-    const resposta = await api.get('/CondicaoJogo')
+    const resposta = await api.get('/tabelatipo/condicoes-jogo')
     return resposta.data.data
   }
 }

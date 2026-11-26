@@ -47,7 +47,6 @@ function Catalogo() {
   const idGenero = parametrosUrl.get('idGenero') ?? ''
   const paginaUrl = Number(parametrosUrl.get('pagina') || 1)
 
-  // Carrega plataformas e gêneros uma única vez.
   useEffect(() => {
     async function carregarFiltros() {
       try {
@@ -71,12 +70,10 @@ function Catalogo() {
     carregarFiltros()
   }, [tentativaFiltros])
 
-  // Mantém o campo de busca sincronizado com a URL.
   useEffect(() => {
     setBuscaDigitada(busca)
   }, [busca])
 
-  // Recarrega os jogos sempre que os parâmetros da URL mudarem.
   useEffect(() => {
     let cancelado = false
 
@@ -171,7 +168,10 @@ function Catalogo() {
     <section>
       <h1 className="mb-4">Catálogo de jogos</h1>
 
-      <form onSubmit={pesquisar} className="row g-3 mb-4">
+      <form
+        onSubmit={pesquisar}
+        className="row g-3 mb-4 catalogo-filtros"
+      >
         <div className="col-md-4">
           <label htmlFor="busca" className="form-label">
             Buscar jogo
