@@ -40,8 +40,8 @@ export const jogoApi = {
     return resposta.data.data
   },
 
-  async obterPorId(id) {
-    const resposta = await api.get(`/Jogo/${id}`)
-    return resposta.data.data
-  }
+  async buscarPorId(id) {
+  const resposta = await api.get(`/Jogo/${id}`)
+  return resposta.data.data
+}
 }
