@@ -1,5 +1,9 @@
-
+using System.Text.Json;
+using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Configuration;
+using RetroGames.WebApi.Filters;
 using RetroGames.WebApi.Middlewares;
 
 // Carrega as variáveis do arquivo .env.
@@ -22,8 +26,40 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddRepositorios(connectionString);
 builder.Services.AddServicosDeNegocio();
 
-// Registra os recursos da API.
-builder.Services.AddControllers();
+// Registra os validators do projeto.
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Registra os recursos da API e o filtro de validação.
+builder.Services.AddControllers(opcoes =>
+{
+    opcoes.Filters.Add<FluentValidationFilter>();
+})
+.ConfigureApiBehaviorOptions(opcoes =>
+{
+    opcoes.InvalidModelStateResponseFactory = contexto =>
+    {
+        var erros = contexto.ModelState
+            .Where(item => item.Value?.Errors.Count > 0)
+            .ToDictionary(
+                item => JsonNamingPolicy.CamelCase.ConvertName(item.Key),
+                item => item.Value!.Errors
+                    .Select(erro =>
+                        string.IsNullOrWhiteSpace(erro.ErrorMessage)
+                            ? "Valor inválido."
+                            : erro.ErrorMessage)
+                    .ToArray());
+
+        var resposta = new ResponseApiModel<Dictionary<string, string[]>>
+        {
+            ResponseCode = ResponseCodes.MODEL_STATE_INVALIDO.Code,
+            Data = erros,
+            ErrorMessage = ResponseCodes.MODEL_STATE_INVALIDO.DefaultMessage
+        };
+
+        return new BadRequestObjectResult(resposta);
+    };
+});
+
 builder.Services.AddOpenApi();
 
 // Registra o tratamento global de exceções.
