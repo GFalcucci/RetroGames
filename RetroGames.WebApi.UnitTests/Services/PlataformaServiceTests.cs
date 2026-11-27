@@ -132,7 +132,7 @@ public class PlataformaServiceTests
     }
 
     [Fact]
-    public async Task Alterar_NomeDuplicado_LancaErroENaoAltera()
+    public async Task Alterar_MantendoProprioNome_AceitaEGrava()
     {
         // Arrange
         var plataforma = new Plataforma
@@ -146,26 +146,22 @@ public class PlataformaServiceTests
                 plataforma.Id))
             .ReturnsAsync(plataforma);
 
+        // A checagem de duplicidade ignora o próprio registro (passa o id),
+        // então não encontra outra plataforma com o mesmo nome.
         _plataformaRepositoryMock
             .Setup(repositorio => repositorio.ExisteComNomeAsync(
                 plataforma.Nome, plataforma.Id))
-            .ReturnsAsync(true);
+            .ReturnsAsync(false);
 
         var servico = CriarServico();
 
         // Act
-        var excecao = await Assert.ThrowsAsync<BusinessRuleException>(
-            () => servico.AlterarAsync(plataforma));
+        await servico.AlterarAsync(plataforma);
 
         // Assert
-        Assert.Equal(
-            BusinessErrors.PlataformaNomeDuplicado.Code,
-            excecao.Erro.Code);
-
         _plataformaRepositoryMock.Verify(
-            repositorio => repositorio.AlterarAsync(
-                It.IsAny<Plataforma>()),
-            Times.Never);
+            repositorio => repositorio.AlterarAsync(plataforma),
+            Times.Once);
     }
 
     [Fact]
