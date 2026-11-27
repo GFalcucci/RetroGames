@@ -1,4 +1,3 @@
-
 using Moq;
 using RetroGames.Model.Model;
 using RetroGames.Repository;
@@ -67,6 +66,69 @@ public class PlataformaServiceTests
             repositorio => repositorio.InserirAsync(
                 It.IsAny<Plataforma>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task Inserir_RepositoryLancaRegistroDuplicado_ConverteParaErroDeNegocio()
+    {
+        // Arrange
+        var plataforma = new Plataforma
+        {
+            Nome = "Nintendo"
+        };
+
+        _plataformaRepositoryMock
+            .Setup(repositorio => repositorio.ExisteComNomeAsync(
+                plataforma.Nome, null))
+            .ReturnsAsync(false);
+
+        _plataformaRepositoryMock
+            .Setup(repositorio => repositorio.InserirAsync(plataforma))
+            .ThrowsAsync(new RegistroDuplicadoException("Registro duplicado"));
+
+        var servico = CriarServico();
+
+        // Act
+        var excecao = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => servico.InserirAsync(plataforma));
+
+        // Assert
+        Assert.Equal(
+            BusinessErrors.PlataformaNomeDuplicado.Code,
+            excecao.Erro.Code);
+    }
+
+    [Fact]
+    public async Task Inserir_NomeDisponivel_RetornaIdGerado()
+    {
+        // Arrange
+        const int idGerado = 42;
+
+        var plataforma = new Plataforma
+        {
+            Nome = "Sega"
+        };
+
+        _plataformaRepositoryMock
+            .Setup(repositorio => repositorio.ExisteComNomeAsync(
+                plataforma.Nome, null))
+            .ReturnsAsync(false);
+
+        _plataformaRepositoryMock
+            .Setup(repositorio => repositorio.InserirAsync(plataforma))
+            .ReturnsAsync(idGerado);
+
+        var servico = CriarServico();
+
+        // Act
+        var resultado = await servico.InserirAsync(plataforma);
+
+        // Assert
+        Assert.Equal(idGerado, resultado);
+
+        _plataformaRepositoryMock.Verify(
+            repositorio => repositorio.InserirAsync(plataforma),
+            Times.Once);
     }
 
     [Fact]
