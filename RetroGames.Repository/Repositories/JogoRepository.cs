@@ -259,6 +259,30 @@ public class JogoRepository : RepositoryBase, IJogoRepository
         await comando.ExecuteNonQueryAsync();
     }
 
+    // 6. Baixa o estoque de forma atômica: o UPDATE só altera a linha
+    // se ainda houver quantidade suficiente (evita vender além do estoque
+    // quando duas compras acontecem ao mesmo tempo).
+    public async Task<bool> BaixarEstoqueAsync(int id, int quantidade)
+    {
+        const string sql = """
+            UPDATE tb_jogo
+            SET qt_estoque = qt_estoque - @quantidade
+            WHERE co_seq_jogo = @id
+              AND st_ativo = 1
+              AND qt_estoque >= @quantidade;
+            """;
+
+        await using var conexao = await AbrirConexaoAsync();
+        await using var comando = CriarComando(conexao, sql);
+
+        AdicionarParametro(comando, "@id", id);
+        AdicionarParametro(comando, "@quantidade", quantidade);
+
+        var linhasAfetadas = await comando.ExecuteNonQueryAsync();
+
+        return linhasAfetadas == 1;
+    }
+
     // Adiciona os parâmetros dos filtros às consultas.
     private void AdicionarFiltros(
         MySqlConnector.MySqlCommand comando,

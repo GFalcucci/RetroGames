@@ -15,6 +15,18 @@ export const autenticacaoApi = {
   async usuarioAtual() {
     const resposta = await api.get('/Autenticacao/eu')
     return resposta.data.data
+  },
+
+  async cadastrar(dados) {
+    const resposta = await api.post('/Autenticacao/cadastrar', dados)
+    return resposta.data.data
+  }
+}
+
+export const pedidoApi = {
+  async inserir(dados) {
+    const resposta = await api.post('/Pedido', dados)
+    return resposta.data.data
   }
 }
 

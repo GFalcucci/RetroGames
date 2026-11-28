@@ -37,6 +37,7 @@ public static class InjecaoDependenciaConfig
         services.AddScoped<ICondicaoJogoService, CondicaoJogoService>();
         services.AddScoped<IJogoService, JogoService>();
         services.AddScoped<IUsuarioService, UsuarioService>();
+        services.AddScoped<IPedidoService, PedidoService>();
 
         services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 

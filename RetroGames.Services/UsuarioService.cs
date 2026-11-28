@@ -1,6 +1,8 @@
 
 using Microsoft.AspNetCore.Identity;
+using RetroGames.Model.Constantes;
 using RetroGames.Model.Model;
+using RetroGames.Repository;
 using RetroGames.Repository.Interfaces;
 using RetroGames.Services.Interfaces;
 
@@ -41,6 +43,42 @@ public class UsuarioService : IUsuarioService
         }
 
         return usuario;
+    }
+
+    public async Task<Usuario> CadastrarClienteAsync(
+        string nome,
+        string email,
+        string senha)
+    {
+        var emailNormalizado = email.Trim();
+
+        if (await _usuarioRepository.BuscarPorEmailAsync(emailNormalizado) != null)
+        {
+            throw new BusinessRuleException(BusinessErrors.EmailJaCadastrado);
+        }
+
+        var cliente = new Usuario
+        {
+            Nome = nome.Trim(),
+            Email = emailNormalizado,
+            Ativo = true,
+            DataCadastro = DateTime.UtcNow,
+            IdPerfil = PerfilIds.Cliente
+        };
+
+        cliente.SenhaHash = _passwordHasher.HashPassword(cliente, senha);
+
+        try
+        {
+            cliente.Id = await _usuarioRepository.InserirAsync(cliente);
+        }
+        catch (RegistroDuplicadoException)
+        {
+            // Duas requisições simultâneas com o mesmo e-mail.
+            throw new BusinessRuleException(BusinessErrors.EmailJaCadastrado);
+        }
+
+        return cliente;
     }
 
     public async Task GarantirAdministradorInicialAsync(

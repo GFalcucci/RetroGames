@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RetroGames.Model.Model;
 using RetroGames.Services.Interfaces;
 using RetroGames.WebApi.ApiModels;
 
@@ -40,22 +41,7 @@ public class AutenticacaoController : ControllerBase
             return Unauthorized(erro);
         }
 
-        var identidade = new ClaimsIdentity(
-            new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Name, usuario.Nome),
-                new Claim(ClaimTypes.Email, usuario.Email),
-                new Claim("IdPerfil", usuario.IdPerfil.ToString()),
-                new Claim(
-                    ClaimTypes.Role,
-                    usuario.IdPerfil == 1 ? "Administrador" : "Cliente")
-            },
-            "Cookies");
-
-        var principal = new ClaimsPrincipal(identidade);
-
-        await HttpContext.SignInAsync(principal);
+        await IniciarSessaoAsync(usuario);
 
         var resposta = new ResponseApiModel<UsuarioAutenticadoResponseApiModel>
         {
@@ -71,6 +57,35 @@ public class AutenticacaoController : ControllerBase
         };
 
         return Ok(resposta);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("cadastrar")]
+    public async Task<ActionResult<ResponseApiModel<UsuarioAutenticadoResponseApiModel>>> Cadastrar(
+        CadastrarClienteRequestApiModel modelo)
+    {
+        var cliente = await _usuarioService.CadastrarClienteAsync(
+            modelo.Nome,
+            modelo.Email,
+            modelo.Senha);
+
+        // Após o cadastro, a sessão já começa.
+        await IniciarSessaoAsync(cliente);
+
+        var resposta = new ResponseApiModel<UsuarioAutenticadoResponseApiModel>
+        {
+            ResponseCode = ResponseCodes.SUCESSO,
+            Data = new UsuarioAutenticadoResponseApiModel
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Email = cliente.Email,
+                IdPerfil = cliente.IdPerfil
+            },
+            ErrorMessage = null
+        };
+
+        return StatusCode(StatusCodes.Status201Created, resposta);
     }
 
     [HttpPost("logout")]
@@ -105,5 +120,25 @@ public class AutenticacaoController : ControllerBase
         };
 
         return Ok(resposta);
+    }
+
+    private async Task IniciarSessaoAsync(Usuario usuario)
+    {
+        var identidade = new ClaimsIdentity(
+            new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Name, usuario.Nome),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim("IdPerfil", usuario.IdPerfil.ToString()),
+                new Claim(
+                    ClaimTypes.Role,
+                    usuario.IdPerfil == 1 ? "Administrador" : "Cliente")
+            },
+            "Cookies");
+
+        var principal = new ClaimsPrincipal(identidade);
+
+        await HttpContext.SignInAsync(principal);
     }
 }

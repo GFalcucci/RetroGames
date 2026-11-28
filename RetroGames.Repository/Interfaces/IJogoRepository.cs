@@ -25,4 +25,8 @@ public interface IJogoRepository
 
     // Desativa um jogo, sem removê-lo do banco.
     Task DesativarAsync(int id);
+
+    // Baixa o estoque de um jogo ativo, só se houver quantidade suficiente.
+    // Retorna false quando nenhuma linha foi alterada (sem estoque).
+    Task<bool> BaixarEstoqueAsync(int id, int quantidade);
 }

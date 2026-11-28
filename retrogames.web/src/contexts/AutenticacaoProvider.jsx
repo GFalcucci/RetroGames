@@ -13,6 +13,12 @@ function AutenticacaoProvider({ children }) {
     return usuarioAutenticado
   }, [])
 
+  const cadastrar = useCallback(async (dados) => {
+    const usuarioCadastrado = await autenticacaoApi.cadastrar(dados)
+    setUsuario(usuarioCadastrado)
+    return usuarioCadastrado
+  }, [])
+
   const sair = useCallback(async () => {
     try {
       await autenticacaoApi.sair()
@@ -63,6 +69,7 @@ function AutenticacaoProvider({ children }) {
     estaAutenticado: Boolean(usuario),
     ehAdministrador: usuario?.idPerfil === 1,
     entrar,
+    cadastrar,
     sair
   }
 

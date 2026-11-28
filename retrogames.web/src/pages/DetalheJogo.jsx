@@ -1,10 +1,13 @@
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { jogoApi } from '../api/servicos'
 import { obterMensagemErro } from '../api/erros'
 import { formatarPreco } from '../lib/formato'
+import { QUANTIDADE_MAXIMA } from '../lib/carrinho'
+import useAutenticacao from '../hooks/useAutenticacao'
+import useCarrinho from '../hooks/useCarrinho'
 
 import {
   Carregando,
@@ -13,6 +16,9 @@ import {
 
 function DetalheJogo() {
   const { id } = useParams()
+
+  const { estaAutenticado, ehAdministrador } = useAutenticacao()
+  const { itens, adicionar } = useCarrinho()
 
   const [jogo, setJogo] = useState(null)
   const [carregando, setCarregando] = useState(true)
@@ -67,6 +73,11 @@ function DetalheJogo() {
     return null
   }
 
+  const esgotado = jogo.estoque <= 0
+  const limite = Math.min(QUANTIDADE_MAXIMA, jogo.estoque)
+  const noCarrinho =
+    itens.find(item => item.idJogo === jogo.id)?.quantidade ?? 0
+
   return (
     <section>
       <h1 className="mb-4">{jogo.nome}</h1>
@@ -105,6 +116,43 @@ function DetalheJogo() {
           )}
         </div>
       </div>
+
+      {!ehAdministrador && (
+        <div className="mt-3">
+          {esgotado ? (
+            <button type="button" className="btn btn-secondary" disabled>
+              Esgotado
+            </button>
+          ) : !estaAutenticado ? (
+            <Link
+              className="btn btn-primary"
+              to={`/login?voltarPara=${encodeURIComponent(`/jogos/${jogo.id}`)}`}
+            >
+              Entre para comprar
+            </Link>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={noCarrinho >= limite}
+                onClick={() => adicionar(jogo)}
+              >
+                Adicionar ao carrinho
+              </button>
+
+              {noCarrinho > 0 && (
+                <span className="ms-3 text-muted" role="status">
+                  {noCarrinho} no carrinho ·{' '}
+                  <Link to="/carrinho">Ver carrinho</Link>
+                  {noCarrinho >= limite &&
+                    ` · limite de ${limite} por pedido`}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </section>
   )
 }
